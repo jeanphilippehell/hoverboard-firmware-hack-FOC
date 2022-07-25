@@ -207,7 +207,9 @@ int main(void) {
   HAL_ADC_Start(&hadc1);
   HAL_ADC_Start(&hadc2);
 
+#ifdef BUZZER_ENABLED
   poweronMelody();
+#endif // BUZZER_ENABLED
   HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
   
   int32_t board_temp_adcFixdt = adc_buffer.temp << 16;  // Fixed-point filter output initialized with current ADC converted to fixed-point
@@ -258,8 +260,10 @@ int main(void) {
       // ####### MOTOR ENABLING: Only if the initial input is very small (for SAFETY) #######
       if (enable == 0 && !rtY_Left.z_errCode && !rtY_Right.z_errCode && 
           ABS(input1[inIdx].cmd) < 50 && ABS(input2[inIdx].cmd) < 50){
+#ifdef BUZZER_ENABLED
         beepShort(6);                     // make 2 beeps indicating the motor enable
         beepShort(4); HAL_Delay(100);
+#endif // BUZZER_ENABLED
         steerFixdt = speedFixdt = 0;      // reset filters
         enable = 1;                       // enable motors
         #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
@@ -416,7 +420,9 @@ int main(void) {
 
       if ((distance / 1345.0) - setDistance > 0.5 && (lastDistance / 1345.0) - setDistance > 0.5) { // Error, robot too far away!
         enable = 0;
+        #ifdef BUZZER_ENABLED
         beepLong(5);
+        #endif // BUZZER_ENABLED
         #ifdef SUPPORT_LCD
           LCD_ClearDisplay(&lcd);
           HAL_Delay(5);
@@ -457,7 +463,7 @@ int main(void) {
         }
       #endif
       transpotter_counter++;
-    #endif
+    #endif // VARIANT_TRANSPOTTER
 
     // ####### SIDEBOARDS HANDLING #######
     #if defined(SIDEBOARD_SERIAL_USART2)
@@ -554,6 +560,7 @@ int main(void) {
       poweroff();
     } else if (rtY_Left.z_errCode || rtY_Right.z_errCode) {                                           // 1 beep (low pitch): Motor error, disable motors
       enable = 0;
+      #ifdef BUZZER_ENABLED
       beepCount(1, 24, 1);
     } else if (timeoutFlgADC) {                                                                       // 2 beeps (low pitch): ADC timeout
       beepCount(2, 24, 1);
@@ -567,11 +574,16 @@ int main(void) {
       beepCount(0, 10, 6);
     } else if (BAT_LVL2_ENABLE && batVoltage < BAT_LVL2) {                                            // 1 beep slow (medium pitch): Low bat 2
       beepCount(0, 10, 30);
+      #endif // BUZZER_ENABLED
     } else if (BEEPS_BACKWARD && (((cmdR < -50 || cmdL < -50) && speedAvg < 0) || MultipleTapBrake.b_multipleTap)) { // 1 beep fast (high pitch): Backward spinning motors
+      #ifdef BUZZER_ENABLED
       beepCount(0, 5, 1);
+      #endif // BUZZER_ENABLED
       backwardDrive = 1;
     } else {  // do not beep
+      #ifdef BUZZER_ENABLED
       beepCount(0, 0, 0);
+      #endif // BUZZER_ENABLED
       backwardDrive = 0;
     }
 

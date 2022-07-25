@@ -417,32 +417,40 @@ void UART_DisableRxErrors(UART_HandleTypeDef *huart)
 /* =========================== General Functions =========================== */
 
 void poweronMelody(void) {
+#ifdef BUZZER_ENABLED
     buzzerCount = 0;  // prevent interraction with beep counter
     for (int i = 8; i >= 0; i--) {
       buzzerFreq = (uint8_t)i;
       HAL_Delay(100);
     }
     buzzerFreq = 0;
+#endif
 }
 
 void beepCount(uint8_t cnt, uint8_t freq, uint8_t pattern) {
+#ifdef BUZZER_ENABLED
     buzzerCount   = cnt;
     buzzerFreq    = freq;
     buzzerPattern = pattern;
+#endif
 }
 
 void beepLong(uint8_t freq) {
+#ifdef BUZZER_ENABLED
     buzzerCount = 0;  // prevent interraction with beep counter
     buzzerFreq = freq;
     HAL_Delay(500);
     buzzerFreq = 0;
+#endif
 }
 
 void beepShort(uint8_t freq) {
+#ifdef BUZZER_ENABLED
     buzzerCount = 0;  // prevent interraction with beep counter
     buzzerFreq = freq;
     HAL_Delay(100);
     buzzerFreq = 0;
+#endif
 }
 
 void beepShortMany(uint8_t cnt, int8_t dir) {
@@ -1543,12 +1551,14 @@ void poweroff(void) {
   #if defined(DEBUG_SERIAL_USART2) || defined(DEBUG_SERIAL_USART3)
   printf("-- Motors disabled --\r\n");
   #endif
+  #ifdef BUZZER_ENABLED
   buzzerCount = 0;  // prevent interraction with beep counter
   buzzerPattern = 0;
   for (int i = 0; i < 8; i++) {
     buzzerFreq = (uint8_t)i;
     HAL_Delay(100);
   }
+  #endif
   saveConfig();
   HAL_GPIO_WritePin(OFF_PORT, OFF_PIN, GPIO_PIN_RESET);
   while(1) {}

@@ -208,7 +208,9 @@ int8_t setParamValInt(uint8_t index, int32_t newValue) {
     }
 
     // Beep if value was modified
+#ifdef BUZZER_ENABLED
     beepShort(5);
+#endif // BUZZER_ENABLED
   }
 
   // Run callback function if assigned
